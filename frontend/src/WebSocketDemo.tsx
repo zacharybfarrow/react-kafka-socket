@@ -1,5 +1,5 @@
 import { Button, Card, TextField, Typography } from '@mui/material';
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 
 export const WebSocketDemo = () => {
@@ -7,6 +7,8 @@ export const WebSocketDemo = () => {
   const [sender, setSender] = useState('');
   const [newMsg, setNewMsg] = useState(false);
   const [response, setResponse] = useState<Record<string, string>[]>([{ user: '', data: '' }]);
+
+  const ws = useRef<WebSocket | null>(null);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newValue = { ...value };
@@ -16,16 +18,11 @@ export const WebSocketDemo = () => {
   };
 
   useEffect(() => {
-    const ws = new WebSocket('ws://127.0.0.1:8000/ws');
+    ws.current = new WebSocket('ws://127.0.0.1:8000/ws');
 
-    const apiCall = { user: sender, data: value[sender] };
-    ws.onopen = () => {
-      if (apiCall.data) {
-        ws.send(JSON.stringify(apiCall));
-      }
-    };
+    const wsCurrent = ws.current;
 
-    ws.onmessage = (event) => {
+    ws.current.onmessage = (event) => {
       try {
         console.log(event);
         const responseData = JSON.parse(event.data);
@@ -36,8 +33,24 @@ export const WebSocketDemo = () => {
     };
 
     return () => {
-      if (ws.readyState === 1) ws.close();
+      if (wsCurrent.readyState === 1) wsCurrent.close();
     };
+  }, []);
+
+  useEffect(() => {
+    if (!ws.current) return;
+
+    const apiCall = { user: sender, data: value[sender] };
+
+    if (ws.current) {
+      ws.current.onopen = () => {
+        if (apiCall.data && ws.current) {
+          ws.current.send(JSON.stringify(apiCall));
+        }
+      };
+      ws.current.onopen(event as Event);
+      setValue({ A: '', B: '' });
+    }
   }, [newMsg]);
 
   return (
@@ -54,33 +67,61 @@ export const WebSocketDemo = () => {
       <Typography variant='h5'>Websocket Chat Example</Typography>
       <div
         css={css`
-          flex-direction: row;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          width: 70vw;
         `}
       >
-        <TextField
-          label='User A'
+        <div
           css={css`
-            background-color: white;
-            width: 50%;
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
           `}
-          onChange={handleChange}
-          value={value.A}
-          id='A'
-        />
-        <Button onClick={() => setNewMsg((prev) => !prev)}>Send from User A</Button>
-        <TextField
-          label='User B'
+        >
+          <TextField
+            label='Chat Message from User A'
+            css={css`
+              background-color: white;
+              width: 50%;
+              margin: 1em;
+            `}
+            onChange={handleChange}
+            value={value.A}
+            id='A'
+          />
+          <Button variant='contained' onClick={() => setNewMsg((prev) => !prev)}>
+            Send from User A
+          </Button>
+        </div>
+        <div
           css={css`
-            background-color: white;
-            width: 50%;
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
           `}
-          onChange={handleChange}
-          value={value.B}
-          id='B'
-        />
-        <Button onClick={() => setNewMsg((prev) => !prev)}>Send from User B</Button>
+        >
+          <TextField
+            label='Chat Message from User B'
+            css={css`
+              background-color: white;
+              width: 50%;
+              margin: 1em;
+            `}
+            onChange={handleChange}
+            value={value.B}
+            id='B'
+          />
+          <Button variant='contained' onClick={() => setNewMsg((prev) => !prev)}>
+            Send from User B
+          </Button>
+        </div>
       </div>
-
       {response && (
         <Typography variant={'subtitle1'}>
           {response.map((msg) => {
