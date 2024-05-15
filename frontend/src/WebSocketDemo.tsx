@@ -123,16 +123,38 @@ export const WebSocketDemo = () => {
         </div>
       </div>
       {response && (
-        <Typography variant={'subtitle1'}>
+        <div
+          css={css`
+            width: 75%;
+          `}
+        >
           {response.map((msg) => {
             if (msg.user && msg.data)
               return (
-                <Typography
-                  key={`${msg.user}-${msg.data}`}
-                >{`${msg.user}: ${msg.data}`}</Typography>
+                <div
+                  css={
+                    msg.user === 'A'
+                      ? css`
+                          display: flex;
+                          flex-direction: row;
+                          justify-content: flex-start;
+                          color: blue;
+                        `
+                      : css`
+                          display: flex;
+                          flex-direction: row;
+                          justify-content: flex-end;
+                          color: green;
+                        `
+                  }
+                >
+                  <Typography
+                    key={`${msg.user}-${msg.data}`}
+                  >{`${msg.user}: ${msg.data}`}</Typography>
+                </div>
               );
           })}
-        </Typography>
+        </div>
       )}
     </Card>
   );

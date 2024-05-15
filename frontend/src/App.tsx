@@ -1,8 +1,6 @@
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import './App.css';
-import { Card } from '@mui/material';
-import { css } from '@emotion/react';
 import { WebSocketDemo } from './WebSocketDemo';
 
 function App() {
@@ -18,16 +16,6 @@ function App() {
       </div>
       <h1>Websocket + Kafka Events</h1>
       <WebSocketDemo />
-      <Card
-        css={css`
-          padding: 2em;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 1em;
-          margin: 1em;
-        `}
-      ></Card>
     </>
   );
 }
