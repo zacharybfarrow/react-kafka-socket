@@ -113,7 +113,7 @@ export const WebSocketDemo = () => {
             `}
           >
             <TextField
-              label='Press enter or click the button to send a message...'
+              label='Send a message...'
               css={css`
                 background-color: white;
                 width: 50%;
